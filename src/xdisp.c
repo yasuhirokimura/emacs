@@ -12470,8 +12470,23 @@ format_mode_line_unwind_data (struct frame *target_frame,
   return vector;
 }
 
+#ifdef USE_W32_IME
+static void unwind_format_mode_line_0 (Lisp_Object vector);
 static void
 unwind_format_mode_line (Lisp_Object vector)
+{
+  int count = SPECPDL_INDEX ();
+
+  specbind (Qw32_ime_buffer_switch_p, Qnil);
+  unwind_format_mode_line_0 (vector);
+  unbind_to (count, Qnil);
+}
+static void
+unwind_format_mode_line_0 (Lisp_Object vector)
+#else  /* !USE_W32_IME */
+static void
+unwind_format_mode_line (Lisp_Object vector)
+#endif /* !USE_W32_IME */
 {
   Lisp_Object old_window = AREF (vector, 7);
   Lisp_Object target_frame_window = AREF (vector, 8);
@@ -12704,8 +12719,23 @@ gui_consider_frame_title (Lisp_Object frame)
 /* Prepare for redisplay by updating menu-bar item lists when
    appropriate.  This can call eval.  */
 
+#ifdef USE_W32_IME
+static void prepare_menu_bars_0 (void);
 static void
 prepare_menu_bars (void)
+{
+  int count = SPECPDL_INDEX ();
+
+  specbind (Qw32_ime_buffer_switch_p, Qnil);
+  prepare_menu_bars_0 ();
+  unbind_to (count, Qnil);
+}
+static void
+prepare_menu_bars_0 (void)
+#else  /* !USE_W32_IME */
+static void
+prepare_menu_bars (void)
+#endif /* !USE_W32_IME */
 {
   bool all_windows = windows_or_buffers_changed || update_mode_lines;
   bool some_windows = REDISPLAY_SOME_P ();

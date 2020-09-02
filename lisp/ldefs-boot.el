@@ -29978,6 +29978,14 @@ twice for the others.
 
 ;;;***
 
+;;;### (autoloads nil "smart-ime" "international/smart-ime.el" (0
+;;;;;;  0 0 0))
+;;; Generated autoloads from international/smart-ime.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "smart-ime" '("wrap-function-to-control-input-method" "universal-argument--mode" "sime-")))
+
+;;;***
+
 ;;;### (autoloads nil "smerge-mode" "vc/smerge-mode.el" (0 0 0 0))
 ;;; Generated autoloads from vc/smerge-mode.el
 
@@ -37117,6 +37125,14 @@ Turn on Viper emulation of Vi in Emacs. See Info node `(viper)Top'." t nil)
 ;;; Generated autoloads from w32-fns.el
 
 (register-definition-prefixes "w32-fns" '("w32-"))
+
+;;;***
+
+;;;### (autoloads nil "w32-ime" "international/w32-ime.el" (0 0 0
+;;;;;;  0))
+;;; Generated autoloads from international/w32-ime.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "w32-ime" '("wrap-function-to-control-ime" "w32-")))
 
 ;;;***
 

@@ -191,6 +191,32 @@ You should set this to t when using a non-system shell.\n\n"))))
 ;;	    (setq source-directory (file-name-as-directory
 ;;				     (expand-file-name ".." exec-directory)))))
 
+;;;###autoload
+(defun w32-convert-standard-filename (filename)
+  "Convert a standard file's name to something suitable for MS-Windows.
+This means to guarantee valid names and perhaps to canonicalize
+certain patterns.
+
+This function is called by `convert-standard-filename'.
+
+Replace invalid characters and turn Cygwin names into native
+names."
+  (save-match-data
+    (let ((name
+	   (if (string-match "\\`/cygdrive/\\([a-zA-Z]\\)/" filename)
+               (replace-match "\\1:/" t nil filename)
+             (copy-sequence filename)))
+	  (start 0))
+      ;; leave ':' if part of drive specifier
+      (if (and (> (length name) 1)
+	       (eq (aref name 1) ?:))
+	  (setq start 2))
+      ;; destructively replace invalid filename characters with !
+      (while (string-match "[?*:<>|\"\000-\037]" name start)
+	(aset name (match-beginning 0) ?!)
+	(setq start (match-end 0)))
+      name)))
+
 (defun w32-set-system-coding-system (coding-system)
   "Set the coding system used by the Windows system to CODING-SYSTEM.
 This is used for things like passing font names with non-ASCII

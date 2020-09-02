@@ -284,34 +284,47 @@
 (load "emacs-lisp/tabulated-list")
 (load "buff-menu")
 
-(if (fboundp 'x-create-frame)
-    (progn
-      (load "fringe")
-      ;; Needed by `imagemagick-register-types'
-      (load "emacs-lisp/regexp-opt")
-      (load "image")
-      (load "international/fontset")
-      (load "dnd")
-      (load "tool-bar")))
+(unless (equal (member "bootstrap" command-line-args) '("bootstrap"))
+  (if (fboundp 'x-create-frame)
+      (progn
+        (load "fringe")
+        ;; Needed by `imagemagick-register-types'
+        (load "emacs-lisp/regexp-opt")
+        (load "image")
+        (load "international/fontset")
+        (load "dnd")
+        (load "tool-bar")))
 
-(if (featurep 'dynamic-setting)
-    (load "dynamic-setting"))
+  (if (featurep 'dynamic-setting)
+      (load "dynamic-setting"))
 
-(if (featurep 'x)
-    (progn
-      (load "x-dnd")
-      (load "term/common-win")
-      (load "term/x-win")))
+  (if (featurep 'x)
+      (progn
+        (load "x-dnd")
+        (load "term/common-win")
+        (load "term/x-win")))
 
-(if (or (eq system-type 'windows-nt)
-        (featurep 'w32))
-    (progn
-      (load "term/common-win")
-      (load "w32-vars")
-      (load "term/w32-win")
-      (load "disp-table")
-      (when (eq system-type 'windows-nt)
-        (load "w32-fns")
+  (if (or (eq system-type 'windows-nt)
+          (featurep 'w32))
+      (progn
+        (load "term/common-win")
+        (load "w32-vars")
+        (load "term/w32-win")
+        (load "disp-table")
+        (load "international/w32-ime")
+        (when (eq system-type 'windows-nt)
+          (load "w32-fns")
+          (load "ls-lisp")
+          (load "dos-w32"))))
+  (if (eq system-type 'ms-dos)
+      (progn
+        (load "dos-w32")
+        (load "dos-fns")
+        (load "dos-vars")
+        ;; Don't load term/common-win: it isn't appropriate for the `pc'
+        ;; ``window system'', which generally behaves like a terminal.
+        (load "term/internal")
+        (load "term/pc-win")
         (load "ls-lisp")
         (load "dos-w32"))))
 (if (eq system-type 'ms-dos)
