@@ -124,7 +124,7 @@ for arg in "$@"; do
         do_check=false;;
       all)
 	do_autoconf=true
-	test -r .git && do_git=true;;
+	;;
       autoconf)
 	do_autoconf=true;;
       git)
@@ -137,7 +137,7 @@ done
 case $do_autoconf,$do_git in
   false,false)
     do_autoconf=true
-    test -r .git && do_git=true;;
+    ;;
 esac
 
 # Generate Autoconf-related files, if requested.
