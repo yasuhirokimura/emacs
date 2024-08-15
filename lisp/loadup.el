@@ -341,6 +341,7 @@
       (load "w32-vars")
       (load "term/w32-win")
       (load "disp-table")
+      (load "international/w32-ime")
       (when (eq system-type 'windows-nt)
         (load "w32-fns")
         (load "ls-lisp")
