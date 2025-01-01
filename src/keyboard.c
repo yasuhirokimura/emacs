@@ -359,6 +359,11 @@ static struct timespec timer_idleness_start_time;
 
 static struct timespec timer_last_idleness_start_time;
 
+#ifdef USE_W32_IME
+static Lisp_Object IME_command_off_flag;
+static Lisp_Object IME_interrupt_flag;
+#endif /* USE_W32_IME */
+
 /* Predefined strings for core device names.  */
 
 static Lisp_Object virtual_core_pointer_name;
@@ -1328,6 +1333,14 @@ command_loop_1 (void)
 
   this_command_key_count = 0;
   this_single_command_key_start = 0;
+
+#ifdef USE_W32_IME
+  if (!NILP (IME_command_off_flag))
+    {
+      Fime_force_on (Qnil);
+      IME_command_off_flag = Qnil;
+    }
+#endif /* USE_W32_IME */
 
   if (NILP (Vmemory_full))
     {
@@ -5202,7 +5215,11 @@ const char *const lispy_function_keys[] =
     "junja",          /* VK_JUNJA          0x17 */
     "final",          /* VK_FINAL          0x18 */
     "kanji",          /* VK_KANJI/VK_HANJA 0x19 */
+#ifdef USE_W32_IME
+    "compend",        /* VK_COMPEND        0x1A */
+#else  /* !USE_W32_IME */
     0,                /*    0x1A                */
+#endif /* !USE_W32_IME */
     "escape",         /* VK_ESCAPE         0x1B */
     "convert",        /* VK_CONVERT        0x1C */
     "non-convert",    /* VK_NONCONVERT     0x1D */
@@ -10855,6 +10872,19 @@ read_key_sequence (Lisp_Object *keybuf, Lisp_Object prompt,
 {
   specpdl_ref count = SPECPDL_INDEX ();
 
+#ifdef USE_W32_IME
+  Lisp_Object IME_command_loop_flag = Qnil;
+  IME_command_off_flag = Qnil;
+  if (!NILP (IME_interrupt_flag))
+    {
+      Lisp_Object func = intern ("sime-inactivate-input-method");
+
+      if (!NILP (Ffboundp (func)))
+	call0 (func);
+      IME_interrupt_flag = Qnil;
+    }
+#endif /* USE_W32_IME */
+
   /* How many keys there are in the current key sequence.  */
   int t;
 
@@ -10990,6 +11020,12 @@ read_key_sequence (Lisp_Object *keybuf, Lisp_Object prompt,
      keybuf[0..mock_input] holds the sequence we should reread.  */
  replay_sequence:
 
+#ifdef USE_W32_IME
+  /* If key sequences are to replay, IME_loop_flag should not be set.
+     Because event has never been occured. */
+  IME_command_loop_flag = Qnil;
+#endif /* USE_W32_IME */
+
   starting_buffer = current_buffer;
   first_unbound = READ_KEY_ELTS + 1;
   Lisp_Object first_event = mock_input > 0 ? keybuf[0] : Qnil;
@@ -11083,6 +11119,16 @@ read_key_sequence (Lisp_Object *keybuf, Lisp_Object prompt,
 	  keytran.map = keytran.parent;
 	  goto replay_sequence;
 	}
+
+#ifdef USE_W32_IME
+      if (!NILP (IME_command_loop_flag) && NILP (IME_command_off_flag))
+	{
+	  IME_command_off_flag = Fw32_get_ime_open_status ();
+	  if (!NILP (IME_command_off_flag))
+	    Fime_force_off (Qnil);
+	}
+      IME_command_loop_flag = Qt;
+#endif	/* USE_W32_IME */
 
       if (t >= READ_KEY_ELTS)
 	error ("Key sequence too long");
@@ -11256,6 +11302,10 @@ read_key_sequence (Lisp_Object *keybuf, Lisp_Object prompt,
 	     Just return -1.  */
 	  if (EQ (key, Qt))
 	    {
+#ifdef USE_W32_IME
+	      if (!NILP (IME_command_off_flag))
+		Fime_force_on (Qnil);
+#endif /* USE_W32_IME */
 	      unbind_to (count, Qnil);
 	      return -1;
 	    }
@@ -11820,6 +11870,11 @@ read_key_sequence (Lisp_Object *keybuf, Lisp_Object prompt,
     = SYMBOLP (read_key_sequence_cmd)
     ? Fcommand_remapping (read_key_sequence_cmd, Qnil, Qnil)
     : Qnil;
+
+#ifdef USE_W32_IME
+  if (!NILP (IME_command_off_flag))
+    Fime_force_on (Qnil);
+#endif /* USE_W32_IME */
 
   unread_switch_frame = delayed_switch_frame;
   unbind_to (count, Qnil);
@@ -12737,6 +12792,10 @@ quit_throw_to_read_char (bool from_signal)
 
   Vunread_command_events = Qnil;
 
+#ifdef USE_W32_IME
+  IME_interrupt_flag = Qt;
+#endif /* USE_W32_IME */
+
   if (FRAMEP (internal_last_event_frame)
       && !EQ (internal_last_event_frame, selected_frame))
     do_switch_frame (make_lispy_switch_frame (internal_last_event_frame),
@@ -13188,6 +13247,10 @@ init_keyboard (void)
   input_pending = false;
   interrupt_input_blocked = 0;
   pending_signals = false;
+#ifdef USE_W32_IME
+  IME_command_off_flag = Qnil;
+  IME_interrupt_flag = Qnil;
+#endif /* USE_W32_IME */
 
   virtual_core_pointer_name = build_string ("Virtual core pointer");
   virtual_core_keyboard_name = build_string ("Virtual core keyboard");

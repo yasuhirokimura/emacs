@@ -1834,8 +1834,24 @@ affects all frames on the same terminal device.  */)
 
    The value of NORECORD is passed as argument to Fselect_window.  */
 
+#ifdef USE_W32_IME
+Lisp_Object
+do_switch_frame_0 (Lisp_Object frame, int track, int for_deletion, Lisp_Object norecord);
 Lisp_Object
 do_switch_frame (Lisp_Object frame, int track, int for_deletion, Lisp_Object norecord)
+{
+  specpdl_ref count = SPECPDL_INDEX ();
+
+  specbind (Qw32_ime_buffer_switch_p, Qnil);
+  do_switch_frame_0 (frame, track, for_deletion, norecord);
+  unbind_to (count, Qnil);
+}
+Lisp_Object
+do_switch_frame_0 (Lisp_Object frame, int track, int for_deletion, Lisp_Object norecord)
+#else  /* !USE_W32_IME */
+Lisp_Object
+do_switch_frame (Lisp_Object frame, int track, int for_deletion, Lisp_Object norecord)
+#endif /* !USE_W32_IME */
 {
   /* If FRAME is a switch-frame event, extract the frame we should
      switch to.  */
@@ -4653,6 +4669,9 @@ static const struct frame_parm_table frame_parms[] =
   {"fullscreen",                SYMBOL_INDEX (Qfullscreen)},
   {"font-backend",		SYMBOL_INDEX (Qfont_backend)},
   {"alpha",			SYMBOL_INDEX (Qalpha)},
+#ifdef USE_W32_IME
+  {"ime-font",			SYMBOL_INDEX (Qime_font)},
+#endif /* USE_W32_IME */
   {"sticky",			SYMBOL_INDEX (Qsticky)},
   {"tool-bar-position",		SYMBOL_INDEX (Qtool_bar_position)},
   {"inhibit-double-buffering",  SYMBOL_INDEX (Qinhibit_double_buffering)},

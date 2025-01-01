@@ -518,6 +518,9 @@ select_window (Lisp_Object window, Lisp_Object norecord,
   struct frame *sf;
   Lisp_Object frame;
   struct frame *f;
+#ifdef USE_W32_IME
+  Lisp_Object oldwin = selected_window;
+#endif /* USE_W32_IME */
 
   CHECK_LIVE_WINDOW (window);
 
@@ -581,6 +584,11 @@ select_window (Lisp_Object window, Lisp_Object norecord,
       w->use_time = ++window_select_count;
       record_buffer (w->contents);
     }
+
+#ifdef USE_W32_IME
+  if (!NILP (Vselect_window_functions))
+    run_hook_with_args_2 (Qselect_window_functions, oldwin, window);
+#endif /* USE_W32_IME */
 
   return window;
 }
@@ -4475,6 +4483,18 @@ This function runs `window-scroll-functions' before running
     }
 
   set_window_buffer (window, buffer, true, !NILP (keep_margins));
+
+#ifdef USE_W32_IME
+  if (! NILP (Vset_selected_window_buffer_functions))
+    {
+      Lisp_Object temp[4];
+      temp[0] = Qset_selected_window_buffer_functions;
+      temp[1] = tem;
+      temp[2] = window;
+      temp[3] = buffer;
+      Frun_hook_with_args (4, temp);
+    }
+#endif /* USE_W32_IME */
 
   return Qnil;
 }
@@ -9115,6 +9135,10 @@ syms_of_window (void)
   DEFSYM (Qwindow_size_change_functions, "window-size-change-functions");
   DEFSYM (Qwindow_buffer_change_functions, "window-buffer-change-functions");
   DEFSYM (Qwindow_selection_change_functions, "window-selection-change-functions");
+#ifdef USE_W32_IME
+  DEFSYM (Qset_selected_window_buffer_functions, "set-selected-window-buffer-functions");
+  DEFSYM (Qselect_window_functions, "select-window-functions");
+#endif /* USE_W32_IME */
   DEFSYM (Qwindowp, "windowp");
   DEFSYM (Qwindow_configuration_p, "window-configuration-p");
   DEFSYM (Qwindow_live_p, "window-live-p");
@@ -9475,6 +9499,17 @@ are actually going to be displayed get fontified.
 Note that this optimization can cause the portion of the buffer
 displayed after a scrolling operation to be somewhat inaccurate.  */);
   fast_but_imprecise_scrolling = false;
+
+#ifdef USE_W32_IME
+  DEFVAR_LISP ("set-selected-window-buffer-functions",
+	       Vset_selected_window_buffer_functions,
+	       doc: /*  */);
+  Vset_selected_window_buffer_functions = Qnil;
+  DEFVAR_LISP ("select-window-functions",
+	       Vselect_window_functions,
+	       doc: /*  */);
+  Vselect_window_functions = Qnil;
+#endif /* USE_W32_IME */
 
   DEFVAR_LISP ("window-dead-windows-table", window_dead_windows_table,
     doc: /* Hash table of dead windows.

@@ -573,6 +573,10 @@ On by default on macOS.])],[],[with_ns=maybe])
 OPTION_DEFAULT_OFF([w32], [use native MS Windows GUI in a Cygwin build])
 OPTION_DEFAULT_OFF([pgtk], [use GTK to support window systems other than X])
 
+OPTION_DEFAULT_ON([w32-ime], [don't compile with W32-IME support])
+OPTION_DEFAULT_ON([reconversion], [don't compile with RECONVERSION support])
+OPTION_DEFAULT_ON([documentfeed], [don't compile with DOCUMENTFEED support])
+
 OPTION_DEFAULT_ON([gpm],[don't use -lgpm for mouse support on a GNU/Linux console])
 OPTION_DEFAULT_IFAVAILABLE([dbus],[compile with D-Bus support])
 AC_ARG_WITH([gconf],[AS_HELP_STRING([--with-gconf],
@@ -7560,6 +7564,42 @@ if test -z "$GMP_H"; then
   HAVE_GMP=yes
 else
   HAVE_GMP=no
+fi
+
+USE_W32_IME=no
+if test "${HAVE_W32}" = "yes"; then
+  if test "${with_w32_ime}" != "no"; then
+    USE_W32_IME=yes
+    AC_DEFINE(USE_W32_IME, 1, [Define to support W32-IME.])
+
+    RECONVERSION=no
+    if test "${with_reconversion}" != "no"; then
+      AC_CACHE_CHECK([whether RECONVERTSTRING is declared],
+        emacs_cv_have_reconvertstring,
+        [AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <windows.h>
+#include <imm.h>]], [[RECONVERTSTRING]])],
+        emacs_cv_have_reconvertstring=yes, emacs_cv_have_reconvertstring=no)])
+      if test "$emacs_cv_have_reconvertstring" = "yes"; then
+        RECONVERSION=yes
+        AC_DEFINE(RECONVERSION, 1, [Define to support RECONVERSION.])
+        AC_DEFINE(HAVE_RECONVERTSTRING, 1, [Define to 1 if you have RECONVERTSTRING.])
+
+        DOCUMENTFEED=no
+        if test "${with_documentfeed}" != "no"; then
+          AC_CHECK_DECL(IMR_DOCUMENTFEED, HAVE_IMR_DOCUMENTFEED=yes,
+            HAVE_IMR_DOCUMENTFEED=no,[[
+#include <windows.h>
+#include <imm.h>]])
+          if test "$ac_cv_have_decl_IMR_DOCUMENTFEED" = "yes"; then
+            DOCUMENTFEED=yes
+            AC_DEFINE(DOCUMENTFEED, 1, [Define to support DOCUMENTFEED.])
+            AC_DEFINE(HAVE_IMR_DOCUMENTFEED, 1, [Define to 1 if you have IMR_DOCUMENTFEED.])
+          fi
+        fi
+      fi
+    fi
+  fi
 fi
 
 emacs_standard_dirs='Standard dirs'

@@ -30515,6 +30515,14 @@ twice for the others.
 (register-definition-prefixes "skeleton" '("skeleton-"))
 
 
+;;;### (autoloads nil "smart-ime" "international/smart-ime.el" (0
+;;;;;;  0 0 0))
+;;; Generated autoloads from international/smart-ime.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "smart-ime" '("wrap-function-to-control-input-method" "universal-argument--mode" "sime-")))
+
+;;;***
+
 ;;; Generated autoloads from vc/smerge-mode.el
 
  (global-set-key "\C-c^" (make-sparse-keymap))
@@ -38183,6 +38191,15 @@ Visual-Wrap-Prefix mode.
 (register-definition-prefixes "w32-fns" '("w32-"))
 
 
+;;;### (autoloads nil "w32-ime" "international/w32-ime.el" (0 0 0
+;;;;;;  0))
+;;; Generated autoloads from international/w32-ime.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "w32-ime" '("wrap-function-to-control-ime" "w32-")))
+
+;;;***
+
+;;;### (autoloads nil "w32-vars" "w32-vars.el" (0 0 0 0))
 ;;; Generated autoloads from w32-vars.el
 
 (register-definition-prefixes "w32-vars" '("w32-"))
