@@ -103,6 +103,9 @@ int w32font_draw (struct glyph_string *s, int from, int to,
 int uniscribe_check_otf (LOGFONT *font, Lisp_Object otf_spec);
 
 Lisp_Object intern_font_name (char *);
+#ifdef USE_W32_IME
+void fill_in_logfont (struct frame *, LOGFONT *, Lisp_Object);
+#endif /* USE_W32_IME */
 
 /* Function prototypes for DirectWrite.  */
 void w32_initialize_direct_write (void);
